@@ -1,4 +1,8 @@
+import time 
 from faster_whisper import WhisperModel
+
+start = time.time()
+
 
 # Import the model
 model_size = "large-v2"
@@ -25,5 +29,8 @@ with open(output_file, 'w') as file:
 
 # Print a message indicating where the transcription was saved
 print(f"Transcription saved to '{output_file}'")
+
+end = time.time()
+print(end - start)
 
 
