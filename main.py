@@ -1,36 +1,41 @@
-import time 
+import os
+import time
+import concurrent.futures
 from faster_whisper import WhisperModel
+from Constants import FileConstants as fileConst
 
-start = time.time()
+def transcribe_audio(file_path, model):
+    segments, info = model.transcribe(file_path)
 
+    transcription_text = [segment.text for segment in segments]
+    full_transcription = ''.join(transcription_text)
 
-# Import the model
-model_size = "large-v2"
+    output_file = os.path.splitext(file_path)[0] + "_transcription.txt"
 
-model = WhisperModel(model_size, device="cpu", compute_type="int8")
+    with open(output_file, 'w') as file:
+        file.write(full_transcription)
 
-segments, _ = model.transcribe("audiomass-output.mp3")
+    print(f"Transcription for {file_path} saved to '{output_file}'")
 
-# Create a list to store the transcription segments
-transcription_text = []
+if __name__ == "__main__":
+    start = time.time()
+    model_size = "large-v2"
+    model = WhisperModel(model_size, device="cuda", compute_type="int8", device_index=[0, 1, 2, 3])
 
-for segment in segments:
-    transcription_text.append(segment.text)
+    audio_folder = fileConst.AUDIO_FOLDER_PATH
+    audio_files = [os.path.join(audio_folder, f) for f in os.listdir(audio_folder) if f.endswith(".mp3")]
 
-# Join the segments into a single text, with newlines per each timestamp
-full_transcription = ''.join(transcription_text)
+    num_workers = 4
 
-# Define the file name for the output text file
-output_file = "transcription.txt"
+    with concurrent.futures.ThreadPoolExecutor(num_workers) as executor:
+        futures = {executor.submit(transcribe_audio, file_path, model): file_path for file_path in audio_files}
 
-# Write the full transcription to the text file
-with open(output_file, 'w') as file:
-    file.write(full_transcription)
+        for future in concurrent.futures.as_completed(futures):
+            file_path = futures[future]
+            try:
+                future.result()
+            except Exception as e:
+                print(f"Transcription for {file_path} generated an error: {e}")
 
-# Print a message indicating where the transcription was saved
-print(f"Transcription saved to '{output_file}'")
-
-end = time.time()
-print(end - start)
-
-
+    end = time.time()
+    print(f'Total time: {end - start}')
