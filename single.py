@@ -16,7 +16,7 @@ def transcribe_audio(file_path):
     model = WhisperModel(model_size, device="cuda", compute_type="int8", device_index=[0, 1, 2, 3])
     output_file = os.path.splitext(file_path)[0] + "_transcription.vtt"
 
-    segments, info = model.transcribe(file_path, beam_size=5)
+    segments, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
     print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
     count = 0
     with open(output_file, 'w') as file:
