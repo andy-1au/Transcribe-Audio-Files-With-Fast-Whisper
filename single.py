@@ -24,7 +24,7 @@ def transcribe_audio(file_path):
             file.write(f'{fileConst.VTT_HEADER}\n\n') # Add the WEBVTT header
             for segment in segments:
                 count += 1
-                duration = f'{convert_seconds_to_hms(segment.start)} --> {convert_seconds_to_hms(segment.end)}\n' # both segment.start and segment.end are returned in seconds
+                duration = f'{convert_seconds_to_hms(segment.start)} --> {convert_seconds_to_hms(segment.end)}\n' # Both segment.start and segment.end are returned in seconds
                 text = f'{segment.text.lstrip()}\n\n' # Removing any leading whitespaces, tabs, etc and double line break for formatting
                 
                 try:
