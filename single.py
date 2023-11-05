@@ -5,10 +5,10 @@ from faster_whisper import WhisperModel
 from Constants import FileConstants as fileConst
 
 def convert_seconds_to_hms(seconds):
-    hours, remainder = divmod(seconds, 3600)
-    minutes, seconds = divmod(remainder, 60)
-    milliseconds = math.floor((seconds % 1) * 1000)
-    output = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{milliseconds:03}"
+    hours, remainder = divmod(seconds, 3600) # Gets the total hours with the remainder being seconds 
+    minutes, seconds = divmod(remainder, 60) # Gets the total minutes from the remainder of seconds, with the remainder being seconds
+    milliseconds = math.floor((seconds % 1) * 1000) # Get the miliseconds from remaining fractional seconds
+    output = f"{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{milliseconds:03}" # Formatting string 
     return output
 
 def transcribe_audio(file_path):
@@ -21,9 +21,9 @@ def transcribe_audio(file_path):
     count = 0
     with open(output_file, 'w') as file:
         for segment in segments:
-            count +=1
-            duration = f"{convert_seconds_to_hms(segment.start)} --> {convert_seconds_to_hms(segment.end)}\n"
-            text = f"{segment.text.lstrip()}\n\n"
+            count += 1
+            duration = f"{convert_seconds_to_hms(segment.start)} --> {convert_seconds_to_hms(segment.end)}\n" # both segment.start and segment.end are returned in seconds
+            text = f"{segment.text.lstrip()}\n\n" # Removing any leading whitespaces, tabs, etc and double line break for formatting
             
             file.write(f"{count}\n{duration}{text}")  # Write formatted string to the file
             print(f"{duration}{text}",end='')
@@ -32,7 +32,7 @@ def transcribe_audio(file_path):
 
 if __name__ == "__main__":
     start = time.time()
-    file_path = 'Test/39151010026843_mix.mp3'
+    file_path = 'Test/39151010209381_01.mp3'
     transcribe_audio(file_path)
 
     end = time.time()
