@@ -1,24 +1,40 @@
 import os
 import time
 import concurrent.futures
+import math
 from faster_whisper import WhisperModel
 from Constants import FileConstants as fileConst
+
+def convert_seconds_to_hms(seconds):
+    hours, remainder = divmod(seconds, 3600)
+    minutes, seconds = divmod(remainder, 60)
+    milliseconds = math.floor((seconds % 1) * 1000)
+    output = f'{int(hours):02}:{int(minutes):02}:{int(seconds):02}.{milliseconds:03}'
+    return output
 
 def transcribe_audio(file_path, model):
     segments, info = model.transcribe(file_path)
 
-    transcription_text = [segment.text for segment in segments]
-    full_transcription = ''.join(transcription_text)
+    output_file = os.path.splitext(file_path)[0] + "_transcription.vtt"
 
-    output_file = os.path.splitext(file_path)[0] + "_transcription.txt"
-
+    count = 0
     with open(output_file, 'w') as file:
-        file.write(full_transcription)
+        try:
+            file.write(f'{fileConst.VTT_HEADER}\n\n')
+            for segment in segments:
+                count += 1
+                duration = f'{convert_seconds_to_hms(segment.start)} --> {convert_seconds_to_hms(segment.end)}\n'
+                text = f'{segment.text.lstrip()}\n\n'
+                file.write(f'{count}\n{duration}{text}')
+                print(f'{duration}{text}', end='')
+        except Exception as e:
+            print(f'Error occurred: {e}')
 
     print(f"Transcription for {file_path} saved to '{output_file}'")
 
 if __name__ == "__main__":
     start = time.time()
+
     model_size = "large-v2"
     model = WhisperModel(model_size, device="cuda", compute_type="int8", device_index=[0, 1, 2, 3])
 
@@ -27,7 +43,7 @@ if __name__ == "__main__":
 
     num_workers = 4
 
-    with concurrent.futures.ThreadPoolExecutor(num_workers) as executor:
+    with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
         futures = {executor.submit(transcribe_audio, file_path, model): file_path for file_path in audio_files}
 
         for future in concurrent.futures.as_completed(futures):

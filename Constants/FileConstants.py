@@ -1,1 +1,2 @@
 AUDIO_FOLDER_PATH: str = 'Test'
+VTT_HEADER: str = 'WEBVTT'
