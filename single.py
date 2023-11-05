@@ -30,10 +30,10 @@ def transcribe_audio(file_path):
                 try:
                     file.write(f'{count}\n{duration}{text}') # Write formatted string to the file
                     print(f'{duration}{text}', end='') # Keeps the duration and text together without separating them on an empty line
-                except:
+                except Exception as e:
                     print(f'Error occurred: {e}')
                     break
-        except: 
+        except Exception as e: 
             print(f'Error occurred: {e}')
     print(f'Transcription for {file_path} saved to {output_file}')
 
