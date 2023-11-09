@@ -13,10 +13,13 @@ def convert_seconds_to_hms(seconds):
     return output
 
 def transcribe_audio(file_path, model):
-    segments, info = model.transcribe(file_path)
-    output_file = os.path.splitext(file_path)[0] + "_transcription.vtt"
+    file_name = os.path.basename(file_path)
+    output_file = os.path.splitext(file_name)[0] + ".vtt"
+    output_file_path = f'{fileConst.OUTPUT_FOLDER_PATH}/{output_file}'
+    
+    segments, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
     count = 0
-    with open(output_file, 'w') as file:
+    with open(output_file_path, 'w') as file:
         try:
             file.write(f'{fileConst.VTT_HEADER}\n\n') # Add the WEBVTT header
             for segment in segments:
@@ -32,7 +35,7 @@ def transcribe_audio(file_path, model):
         except Exception as e:
             print(f'Error occurred: {e}')
 
-    print(f"Transcription for {file_path} saved to '{output_file}'")
+    print(f"Transcription for {file_path} saved to '{output_file_path}'")
 
 if __name__ == "__main__":
     start = time.time()
@@ -40,8 +43,17 @@ if __name__ == "__main__":
     model_size = "large-v2"
     model = WhisperModel(model_size, device="cuda", compute_type="int8", device_index=[0, 1, 2, 3])
 
-    audio_folder = fileConst.AUDIO_FOLDER_PATH
-    audio_files = [os.path.join(audio_folder, f) for f in os.listdir(audio_folder) if f.endswith(".mp3")]
+    audio_paths_txt = fileConst.AUDIO_FILES_PATH
+    audio_files = []
+    try:
+        with open(audio_paths_txt, 'r') as file:
+            for line in file:
+                path = line.strip()
+                audio_files.append(path)
+    except FileNotFoundError:
+        print(f"File {audio_paths_txt} not found.")
+    except IOError:
+        print(f"Could not read file {audio_paths_txt}.")
 
     num_workers = 4
 

@@ -159,6 +159,12 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 .idea/
 
-audiomass-output.mp3
-Test
 SRTs
+Test
+helpful_commands.txt
+drive_01_LU_29400_mp3_files_list.txt
+drive_01_LU_29400_transcriptions
+drive_01_LU_29400
+drive_02_LU_30424
+drive_02_LU_30424_transcriptions
+drive_02_LU_30424_mp3_files_list.txt
