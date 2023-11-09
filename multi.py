@@ -16,7 +16,6 @@ def transcribe_audio(file_path, model):
     file_name = os.path.basename(file_path)
     output_file = os.path.splitext(file_name)[0] + ".vtt"
     output_file_path = f'{fileConst.OUTPUT_FOLDER_PATH}/{output_file}'
-    
     segments, info = model.transcribe(file_path, beam_size=5, vad_filter=True)
     count = 0
     with open(output_file_path, 'w') as file:
@@ -34,8 +33,6 @@ def transcribe_audio(file_path, model):
                     break
         except Exception as e:
             print(f'Error occurred: {e}')
-
-    print(f"Transcription for {file_path} saved to '{output_file_path}'")
 
 if __name__ == "__main__":
     start = time.time()
